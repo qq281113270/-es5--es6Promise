@@ -17,6 +17,7 @@
                 time:null,
                 data:'',
                 filter:function(arr,key){
+                     //过滤队列中的同级的key函数
                        for( var i=0; i<arr.length; i++){
                             if(arr[i].key==key){
                                 arr.splice(0,i+1);
@@ -29,6 +30,7 @@
                        return arr;
                     },       
                 start:function(data,key){
+                     //开始执行队列中的函数
 
                     var _this=this;
                     (function(data,key){
@@ -42,7 +44,7 @@
                           
                            for(var i=0; i<_this.listFn.length; i++){
                             
-                            
+                                  //匹配key值 执行then或者catch函数
                                  if(_this.listFn[i].key==key){
                                     // console.log(key)
                                        index=i;
@@ -51,10 +53,10 @@
                            }
                             if(index!==null){  
                                 try{
-                                    data=_this.listFn[index].fn(data);
-                                   
-                                   _this.listFn.splice(index,index+1);
-                                     _this.filter.call(_this,_this.listFn,'catch');                                   
+                                     //执行 key值 执行then或者catch函数
+                                    data=_this.listFn[index].fn(data); 
+                                     //已经执行的函数退出队列      
+                                    _this.listFn.splice(index,index+1);                                                            
                                    if(_this.listFn.length>=1){                                    
                                         try{
                                               _this.start.call(_this,data,'then')
@@ -63,12 +65,30 @@
                                          }
                                      }  
                                 }catch(e){
-                                    _this.data=_this.listFn[index].fn(data);
-                                    _this.listFn.splice(index,index+1);
-                                       _this.filter.call(_this,_this.listFn,'catch'); 
-                                      if(_this.listFn.length>=1){
-                                         _this.start.call(_this,data,'catch')
-                                      }
+                                      
+                                    
+                                   //发生错误的时候执行可以当执行then 报错异常的时候 已经执行完then，所以bug导致来至这里 ，then发生错误执行catch
+                                   //调用catch 函数
+                                     _this.start.call(_this,data,'catch')
+                               //执行catch 函数
+                                     _this.data=_this.listFn[index].fn(data);
+                             //执行过的catch 函数 退出队列
+
+                                     _this.listFn.splice(index,index+1);
+                             //删除  
+                            // _this.filter.call(_this,_this.listFn,'then');
+
+                                     if(_this.listFn.length>=1){  
+                                         //删除一个统计的then
+                                        if (_this.listFn[0].key=='then') {
+                                            _this.listFn.splice(index,index+1);
+                                        }                                  
+                                        try{
+                                              _this.start.call(_this,data,'then')
+                                         }catch(e){
+                                                _this.start.call(_this,data,'catch')
+                                         }
+                                     } 
                                     
                                 }                             
                                     
@@ -81,21 +101,19 @@
                 rejec:function(data){
                      this.start.call(this,data,'catch')
                  },
-                resolve:function(data){
-                     
-
-
+                resolve:function(data){                    
                 try{ 
                      
                          this.start.call(this,data,'then')
                          
                 }catch(e){
-                    console.log(e)
+                     
                          this.start.call(this,data,'catch')
                     }                      
                            
                 },             
-              then:function(fn){                  
+              then:function(fn){   
+              //添加队列then函数               
                   this.listFn.push({
                     key:'then',
                     fn:fn
@@ -103,6 +121,7 @@
                    return this;
               },
               catch:function(fn){
+                //添加队列catch函数  
                    this.listFn.push({
                     key:'catch',
                     fn:fn
@@ -116,11 +135,12 @@
         }).then(function(data){
                 console.log('then');
                 console.log(data);
-     
+             throw 123;  
              return data;
         }).catch(function(data){
-              
+                   console.log('catch');
              console.log(data);
+              return data;
         }).then(function(data){
                 console.log('then');
                 console.log(data);
