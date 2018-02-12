@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>es5原生模仿-es6Promise</title>
- 
-    </style>
-
 <body>
-     <script type="text/javascript">
-             
+     <script type="text/javascript">      
+         //虽然写的也原生的有点差距不是很完美，只是这个例子给大家了解下es6的Promise 异步机制原理而已。
         function _Promise(fn){
              fn.call(this,this.resolve.bind(this),this.rejec.bind(this));
         }
@@ -34,16 +31,9 @@
 
                     var _this=this;
                     (function(data,key){
-
-
-
-                  setTimeout(function(){
-                          
-                      
-                           var index=null;
-                          
-                           for(var i=0; i<_this.listFn.length; i++){
-                            
+                  setTimeout(function(){                         
+                           var index=null;                         
+                           for(var i=0; i<_this.listFn.length; i++){                            
                                   //匹配key值 执行then或者catch函数
                                  if(_this.listFn[i].key==key){
                                     // console.log(key)
@@ -73,7 +63,6 @@
                                //执行catch 函数
                                      _this.data=_this.listFn[index].fn(data);
                              //执行过的catch 函数 退出队列
-
                                      _this.listFn.splice(index,index+1);
                              //删除  
                             // _this.filter.call(_this,_this.listFn,'then');
@@ -88,13 +77,9 @@
                                          }catch(e){
                                                 _this.start.call(_this,data,'catch')
                                          }
-                                     } 
-                                    
-                                }                             
-                                    
-
-                               }
-                           
+                                    }                                    
+                                }                                                              
+                               }                         
                         }.bind(_this),0)
                  })(data,key)  
                 },
@@ -102,12 +87,9 @@
                      this.start.call(this,data,'catch')
                  },
                 resolve:function(data){                    
-                try{ 
-                     
-                         this.start.call(this,data,'then')
-                         
-                }catch(e){
-                     
+                try{                      
+                         this.start.call(this,data,'then')                         
+                }catch(e){                     
                          this.start.call(this,data,'catch')
                     }                      
                            
@@ -128,8 +110,7 @@
                   });
                    return this;
               },            
-        }
-  
+        }  
         new _Promise(function(resolve,rejec){
                  resolve(100);            
         }).then(function(data){
